@@ -1,0 +1,388 @@
+<!--
+    This file is part of CTMC Analyzer.
+
+    CTMC Analyzer is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    CTMC Analyzer is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with CTMC Analyzer.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<html>
+
+<head>
+
+    <title>CTMC Analyzer</title>
+
+    <script src="assets/js/libraries/jquery-3.6.0.slim.min.js"></script>
+    <script src="assets/js/libraries/bootstrap.min.js"></script>
+    <script src="assets/js/libraries/vis-network.min.js"></script>
+
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/bootstrap-theme.min.css">
+
+    <style>
+        #modelPanel {
+            position: relative;
+            width: 100%;
+            height: 65%;
+            border: 1px solid black;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="">
+        <div class="mt-4 p-5 bg-secondary text-white rounded">
+            <h3>Continuous-Time Markov Chain Analyzer</h3>
+        </div>
+    </div>
+    <div>
+        <button type="button" class="btn btn-primary" id="btnCreateState">Create
+            one State</button>
+        <button type="button" class="btn btn-link pull-right" data-toggle="modal"
+            data-target="#modalHelp">Help-me</button>
+    </div>
+    <div id="modelPanel"></div>
+
+
+    <!-- Informação da atividades-->
+
+    <div class="modal fade" id="modalStateInfo" tabindex="-1" role="dialog" aria-labelledby="State information"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">State Informaion</h4>
+
+                </div>
+                <div class="modal-body" id="actInfoBody">
+                    <h5 class="modal-title">State Number: 
+                        <b>
+                            <div id="StateNumber"></div>
+                        </b>
+                    </h5>
+
+                    <button id="btnDeleteState" type="button" class="btn btn-primary" data-dismiss="modal">delete
+                        this state</button>
+                </div>
+                <div class="modal-body" id="edgesInfoBody">
+                    <h5 class="modal-title">State Transitions</h5>
+                    <table id="tblEdgInfo" class="table">
+
+                    </table>
+
+                    <button type="button" id="btnInsertTransition" trId="" class="btn btn-link" data-toggle="modal"
+                        data-target="#modalCreateTransition">Insert one transition</button>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- criar transição-->
+
+    <div class="modal fade" id="modalCreateTransition" tabindex="-1" role="dialog" aria-labelledby="insert one transition"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Insert a Transition</h5>
+
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="input-group mb-3" style="width: 100%;">
+                            <label for="toID">To:</label><br />
+                            <select id="toID" class="form-control" placeholder="Activity id" aria-label="Activity Id"
+                                aria-describedby="basic-addon2">
+
+                            </select>
+                        </div>
+                        <div class="input-group mb-3">
+                            <label for="trRate">Transition Rate:</label><br />
+                            <input id="trRate" type="text" class="form-control" placeholder="rate" aria-label="rate"
+                                aria-describedby="basic-addon2" />
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" id="btnCreateTransition" class="btn btn-primary"
+                        data-dismiss="modal">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informação da Transição-->
+
+    <div class="modal fade" id="modalTransitionInfo" tabindex="-1" role="dialog" aria-labelledby="Activity information"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" >Transition info</h4>
+
+                </div>
+                <div class="modal-body" id="actInfoBody">
+                    <h5 class="modal-title" >Parameters</h5>
+                    <table id="tblTrInfo" class="table">
+                        <tr>
+                            <th>From:</th>
+                            <td id="fromInfo"></td>
+                        </tr>
+                        <tr>
+                            <th>To:</th>
+                            <td id="toInfo"></td>
+                        </tr>
+                        <tr>
+                            <th>Rate:</th>
+                            <td id="rateInfo"></td>
+                        </tr>
+                    </table>
+                    <button id="btnPModalUpdateTransition" type="button" class="btn btn-primary">update transition's
+                        rate</button>
+                    <button id="btnDeleteTransition" type="button" data-dismiss="modal" class="btn btn-primary">Delete
+                        this transition</button>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Atualização da transição-->
+
+    <div class="modal fade" id="modalUpdateTransition" tabindex="-1" role="dialog" aria-labelledby="insert atransition"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Transition Update</h5>
+
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="input-group mb-3">
+                            <label for="trUpRate">transition Rate:</label><br />
+                            <input id="trUpRate" type="text" class="form-control" placeholder="rate" aria-label="rate"
+                                aria-describedby="basic-addon2">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" id="btnUpdateTransition" class="btn btn-primary"
+                        data-dismiss="modal">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gerar JSON-->
+
+    <div class="modal fade" id="modalGnrJSON" tabindex="-1" role="dialog" aria-labelledby="copy JSON"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" >Model JSON</h5>
+
+                </div>
+                <div class="modal-body">
+                    <textarea class="form-control" id="txtAreaGnrJSON" rows="6"></textarea>
+                </div>
+                <div class="modal-footer">
+
+                    <button type="button" class="btn btn-primary" id="btnCopyJSON" data-dismiss="modal">copy
+                        JSON</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carregar JSON-->
+
+    <div class="modal fade" id="modalLoadJSON" tabindex="-1" role="dialog" aria-labelledby="load JSON"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" >Load a JSON</h5>
+
+                </div>
+                <div class="modal-body">
+                    <textarea class="form-control" id="txtAreaLoadJSON" rows="6"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnLoadJSON" data-dismiss="modal">Load
+                        Model</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultado da análise MTTF-->
+
+    <div class="modal fade" id="modalResultMTTF" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Results</h4>
+
+                </div>
+                <div class="modal-body">
+                    <div class="panel">
+                        <table class="table">
+                            <tr>
+                                <td>
+                                    <p class="h4">Mean Time to Finish:</p>
+                                    <p class="h5" id="MTTFInfo"></p>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </div>
+                    <div class="panel">
+                        <p class="h4">States Info</p>
+                        <table id="tblActRes" class="table">
+
+                        </table>
+                    </div>
+                    <div class="panel">
+                        <p class="h4">Absortion Probs</p>
+                        <table id="tblAbsRes" class="table">
+
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- resultado da análise Availability-->
+    <div class="modal fade" id="modalResultAvailability" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Steady-State Probabilities</h4>
+
+                </div>
+                <div class="modal-body">
+                    <div class="panel">
+                        <p class="h4">Probabilities</p>
+                        <table id="tblSttRes" class="table">
+
+                        </table>
+                    </div>
+                    <div class="painel" style="color: blue;">
+                        <small>
+                            The availability is calculated through the sum of desired probabilities
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help -->
+
+    <div class="modal fade" id="modalHelp" tabindex="-1" role="dialog" aria-labelledby="load JSON" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Help</h5>
+
+                </div>
+                <div class="modal-body" style="font-size: 9pt;">
+                    This program is a general-purpose analyzer and makes use of Continuous-Time Markov Chain formalism<br/>
+                    <ul>
+                        <li>
+                            Double-click the working area to create a new state. 
+                        </il>
+                        <li>
+                            Double-click one state to see its info and to insert transitions from it.
+                        </li>
+                        <li>
+                            Double-click one transition to see its info and to update its rate.
+                        </li>
+                        <li>
+                            If your analysis didn't work, check the reachability graph of your model.
+                        </li>
+                        <li>
+                            This program will verify the type of analysis automatically. If your model 
+                            has at last one absorption state, the system will calculate the MTTF. If 
+                            your model is closed, The system will calculate the steady-state probabilities.
+                        </li>
+                    </ul>
+                    This page has been developed by dr. Eduardo M. Vasconcelos. If you have any questions about this
+                    page or have faced bugs during an analysis, please, contact me:
+                    <small>eduardo.vasconcelos@recife.ifpe.edu.br</small><br />
+                    For more info about the process to compute the MTTF, please, read this paper
+                    https://arxiv.org/abs/2202.00674<br />
+                    This page makes use of vis.js library: https://visjs.org/
+                </div>
+                <div class="modal-footer">
+
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Painel da parte de baixo -->
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="">
+                <div class="d-flex row">
+                    <button type="button" id="btnPerfAnalysis" class="btn btn-primary">Perform Analysis</button>
+                    <div class="pull-right" style="width: fit-content;">
+                        <button type="button" id="btnGnrJSON" class="btn btn-link" data-toggle="modal"
+                            data-target="#modalGnrJSON">Generate JSON</button>
+                        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#modalLoadJSON">Load
+                            Model from JSON</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/codes/CTMCFuncitions.js"></script>
+    <script src="assets/js/codes/states.js"></script>
+    <script src="assets/js/codes/transitions.js"></script>
+    <script src="assets/js/codes/analysis.js"></script>
+    <!-- Este código precisa estar aqui em baixo porque ele usa métodos definidos nos outros arquivos-->
+    <script src="assets/js/codes/board.js"></script>
+
+
+
+</body>
+
+</html>
